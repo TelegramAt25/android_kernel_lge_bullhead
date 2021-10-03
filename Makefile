@@ -576,8 +576,12 @@ all: vmlinux
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS	+= -O2
+OPT_FLAGS	:= -O2 -march=armv8-a+crypto+crc
+OPT_FLAGS	+= -mtune=cortex-a53
 endif
+
+KBUILD_CFLAGS	+= $(OPT_FLAGS)
+KBUILD_AFLAGS	+= $(OPT_FLAGS)
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
 
