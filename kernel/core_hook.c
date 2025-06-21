@@ -689,7 +689,7 @@ LSM_HANDLER_TYPE ksu_sb_mount(const char *dev_name, const struct path *path,
 #define DEVPTS_SUPER_MAGIC	0x1cd1
 #endif
 
-extern int ksu_handle_devpts(struct inode *inode); // sucompat.c
+extern int __ksu_handle_devpts(struct inode *inode); // sucompat.c
 
 LSM_HANDLER_TYPE ksu_inode_permission(struct inode *inode, int mask)
 {
@@ -697,7 +697,7 @@ LSM_HANDLER_TYPE ksu_inode_permission(struct inode *inode, int mask)
 #ifdef CONFIG_KSU_DEBUG
 		pr_info("%s: handling devpts for: %s \n", __func__, current->comm);
 #endif
-		ksu_handle_devpts(inode);
+		__ksu_handle_devpts(inode);
 	}
 	return 0;
 }
