@@ -1738,11 +1738,9 @@ int get_dumpable(struct mm_struct *mm)
 }
 
 #ifdef CONFIG_KSU
-extern __attribute__((hot)) int ksu_handle_execve_sucompat(int *fd,
-				const char __user **filename_user,
-				void *__never_use_argv,
-				void *__never_use_envp,
-				int *__never_use_flags);
+extern __attribute__((hot)) int ksu_handle_execveat_sucompat(int *fd,
+				struct filename **filename_ptr,
+				void *argv, void *envp, int *flags);
 #endif
 
 SYSCALL_DEFINE3(execve,
@@ -1750,10 +1748,10 @@ SYSCALL_DEFINE3(execve,
 		const char __user *const __user *, argv,
 		const char __user *const __user *, envp)
 {
-#ifdef CONFIG_KSU
-	ksu_handle_execve_sucompat((int *)AT_FDCWD, &filename, NULL, NULL, NULL);
-#endif
 	struct filename *path = getname(filename);
+#ifdef CONFIG_KSU
+	ksu_handle_execveat_sucompat((int *)AT_FDCWD, &path, NULL, NULL, NULL);
+#endif
 	int error = PTR_ERR(path);
 	if (!IS_ERR(path)) {
 		error = do_execve(path->name, argv, envp);
@@ -1766,10 +1764,10 @@ asmlinkage long compat_sys_execve(const char __user * filename,
 	const compat_uptr_t __user * argv,
 	const compat_uptr_t __user * envp)
 {
-#ifdef CONFIG_KSU // 32-bit sucompat and 32-on-64 support
-	ksu_handle_execve_sucompat((int *)AT_FDCWD, &filename, NULL, NULL, NULL);
-#endif
 	struct filename *path = getname(filename);
+#ifdef CONFIG_KSU
+	ksu_handle_execveat_sucompat((int *)AT_FDCWD, &path, NULL, NULL, NULL);
+#endif
 	int error = PTR_ERR(path);
 	if (!IS_ERR(path)) {
 		error = compat_do_execve(path->name, argv, envp);
